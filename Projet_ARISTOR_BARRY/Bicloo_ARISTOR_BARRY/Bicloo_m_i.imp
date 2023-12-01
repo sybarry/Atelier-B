@@ -1,0 +1,71 @@
+/* Bicloo_m_i
+ * Author: ARISTOR
+ * Creation date: 30/11/2023
+ */
+
+IMPLEMENTATION Bicloo_m_i
+REFINES Bicloo_m_r
+
+CONCRETE_VARIABLES
+    bicloos,
+    parcs,
+    sousPlaces,
+    biclooDansParc,  // Variable d'état
+    sortiDeParc,       // Variable d'état pour mémoriser le bicloo sorti
+    parcAvecPlace
+
+INITIALISATION
+    bicloos := {};
+    sousPlaces := {};
+    parcs := {};
+    biclooDansParc := {};
+    sortiDeParc := {};
+    parcAvecPlace := {}
+
+OPERATIONS
+    sortirBicloo(bicloo, place) =
+        bicloo : Bicloos &
+        place : Place &
+        biclooDansParc(bicloo) : place 
+        & sortiDeParc(bicloo) = FALSE
+    THEN
+        sortiDeParc := sortiDeParc <+ {bicloo |-> TRUE}
+    END;
+
+    rangerBicloo(bicloo, place) = 
+        bicloo : Bicloos &
+        place : Place &
+        bicloo /: bicloos &
+        place /: Place &
+        card(biclooDansParc) < maxBicloos
+    THEN
+        bicloos := bicloos \/ {bicloo};
+        sousPlaces := Place \/ {place};
+        biclooDansParc(bicloo) := place;
+        sortiDeParc := sortiDeParc <+ {bicloo |-> FALSE}
+    END;
+
+    ajouterParc(nouveauParc) =
+        nouveauParc : Parc &
+        nouveauParc /: parcs
+    THEN
+        parcs := parcs \/ {nouveauParc}
+    END;
+
+    supprimerParc(parcAsupprimer) =
+        parcAsupprimer : Parc &
+        parcAsupprimer : parcs
+    THEN
+        parcs := parcs - {parcAsupprimer}
+    END;
+
+    deplacerBicloo(bicloo, nvPlace) =
+        bicloo : Bicloos &
+        nvPlace : Place &
+        biclooDansParc(bicloo) /: Place
+    THEN
+        sousPlaces := (sousPlaces \/ {nvPlace}) - {place | place : sousPlaces & place = biclooDansParc(bicloo)};
+        biclooDansParc(bicloo) := nvPlace
+    END
+
+END
